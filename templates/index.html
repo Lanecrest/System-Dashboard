@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script type="module" src="{{ url_for('static', filename='js/theme.js') }}"></script>
+    <title>System Dashboard Matrix</title>
+</head>
+<body>
+    <div class="button-menu">
+        <label for="dns-selector">DNS:</label>
+            <select id="dns-selector">
+            </select>
+        <button id="network-check">Internet Check</button>
+        <button id="theme-toggle" class="button-phosphor">P3 Phosphor</button>
+    </div>
+    <div id="panel">
+        <div class="card">
+            <div class="title">SYSTEM INFO</div>
+            <pre id="system">Loading system info…</pre>
+        </div>
+        <div class="card">
+            <div class="title">CPU INFO</div>
+            <pre id="cpu">Loading CPU info…</pre>
+        </div>
+        <div class="card">
+            <div class="title">MEMORY INFO</div>
+            <pre id="memory">Loading memory info…</pre>
+        </div>
+        <div class="card">
+            <div class="title">DISK INFO</div>
+            <pre id="disk">Loading disk info…</pre>
+        </div>
+        <div class="card">
+            <div class="title">NETWORK INFO</div>
+            <pre id="network">Loading network info…</pre>
+        </div>
+    </div>
+
+    <script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>
