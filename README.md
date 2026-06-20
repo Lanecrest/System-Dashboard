@@ -16,9 +16,13 @@ Cross-compatibility is a key development goal while also maintaining a "retro" a
 [Change Log](CHANGELOG.md)
 
 # Requirements
--Python3
--A modern web browser
--psutil and Flask python modules
+- Python3
+- A modern web browser
+- psutil and Flask python modules
+
+# Road Map
+Continue improving the 5 current "core" modules (system info, CPU, memory, disk, and network) 
+before introducing additional modules
 
 # Credits
 Lanecrest Tech © 2026
