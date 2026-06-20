@@ -56,6 +56,10 @@ button {
     font-family: var(--main-font);
 }
 
+label {
+    font-size: 14px;
+}
+
 select {
     background: transparent;
     border: 1px solid var(--btn-color);

@@ -30,6 +30,14 @@ def api_set_dns():
     network.set_dns_resolver(resolver)
     return jsonify(success=True)
 
+@app.route("/api/matrix/ip-check", methods=["POST"])
+def api_set_ip_api():
+    data = request.get_json() or {}
+    current_api = network.get_network()["ipapi"]
+    checker = data.get("checker", current_api)
+    network.set_ip_checker(checker)
+    return jsonify(success=True)
+
 @app.route("/")
 def index():
     return render_template("index.html")

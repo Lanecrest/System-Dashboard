@@ -1,0 +1,16 @@
+{
+    "TIMERS": {
+        "internet_check_seconds": 60,
+        "frontend_refresh_seconds": 1.5
+    },
+    "DNS_RESOLVERS": {
+        "Cloudflare": "1.1.1.1",
+        "Google": "8.8.8.8",
+        "0.0.0.0": "0.0.0.0"
+    },
+    "IP_CHECKERS": {
+        "icanhazip": "https://icanhazip.com",
+        "ipify": "https://api.ipify.org",
+        "0.0.0.0": "0.0.0.0"
+    }
+}

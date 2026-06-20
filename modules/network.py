@@ -1,26 +1,45 @@
-import psutil, time, platform, subprocess, socket, urllib.request, ssl
+import psutil, time, platform, os, subprocess, socket, json, urllib.request, ssl
+
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+CONFIG_PATH = os.path.join(BASE_DIR, "..", "static", "config.json")
+try:
+    with open(CONFIG_PATH, "r") as f:
+        config_data = json.load(f)
+    timers = config_data["TIMERS"]
+    INTERNET_CHECK = timers["internet_check_seconds"]
+    DNS_RESOLVER = config_data.get("DNS_RESOLVERS", {})
+    IP_CHECKER = config_data.get("IP_CHECKERS", {})
+except Exception:
+    INTERNET_CHECK = 60
+    DNS_RESOLVER = {"Cloudflare": "1.1.1.1"}
+    IP_CHECKER = {"icanhazip": "https://icanhazip.com"}
+_dns_address = list(DNS_RESOLVER.keys())[0]
+_ip_website = list(IP_CHECKER.keys())[0]
 
 _cached_connected_status = False
 _last_conn_check = 0
 _cached_public_ip = None
-DNS_RESOLVER = {
-    "Cloudflare": "1.1.1.1",
-    "Google": "8.8.8.8",
-    "0.0.0.0": "0.0.0.0"
-}
-_dns_address = list(DNS_RESOLVER.keys())[0]
+_cached_gateway_ip = None
 
 def set_dns_resolver(address):
     global _dns_address, _last_conn_check
     if address in DNS_RESOLVER:
         _dns_address = address
 
+def set_ip_checker(website):
+    global _ip_website, _cached_public_ip
+    if website in IP_CHECKER:
+        _ip_website = website
+
 def _is_connected():
     dns_website = DNS_RESOLVER.get(_dns_address, DNS_RESOLVER[list(DNS_RESOLVER.keys())[0]])
 
-    global _cached_connected_status, _last_conn_check
+    global _cached_connected_status, _last_conn_check, _cached_public_ip, _cached_gateway_ip
     now = time.time()
-    if now - _last_conn_check > 60:
+    if now - _last_conn_check > INTERNET_CHECK:
+        _cached_public_ip = None
+        _cached_gateway_ip = None
         s = None
         try:
             s = socket.create_connection((dns_website, 53), timeout=1)
@@ -35,7 +54,7 @@ def _is_connected():
 
 def _get_public_ip():
     user_agent = "System-Dashboard-Matrix"
-    ip_website = "https://icanhazip.com"
+    ip_website = IP_CHECKER.get(_ip_website, IP_CHECKER[list(IP_CHECKER.keys())[0]])
 
     global _cached_public_ip
     if not _is_connected():
@@ -60,9 +79,13 @@ def _get_public_ip():
                 return _cached_public_ip
     except Exception:
         pass
-    return "Unable to Resolve"
+    _cached_public_ip = "Unable to Resolve"
+    return _cached_public_ip
 
 def _get_gateway_ip():
+    global _cached_gateway_ip
+    if _cached_gateway_ip is not None:
+        return _cached_gateway_ip
     os_name = platform.system()
 
     if os_name == "Windows":
@@ -71,18 +94,24 @@ def _get_gateway_ip():
             gateway_check = subprocess.check_output(cmd, stderr=subprocess.DEVNULL).decode()
             gateway_line = [line for line in gateway_check.splitlines() if "0.0.0.0" in line and "Default" not in line]
             if gateway_line:
-                return gateway_line[0].split()[2]
+                _cached_gateway_ip = gateway_line[0].split()[2]
+                return _cached_gateway_ip
         except Exception:
             pass
     else:
         try:
-            cmd = "netstat -rn | grep default | awk '{print $2}' | head -n 1"
+            if platform.system() == "Darwin":
+                cmd = "netstat -rn -f inet | grep default | awk '{print $2}' | head -n 1"
+            else:
+                cmd = "netstat -rn -4 | grep default | awk '{print $2}' | head -n 1"
             gateway_check = subprocess.check_output(cmd, shell=True, stderr=subprocess.DEVNULL).decode().strip()
             if gateway_check:
-                return gateway_check
+                _cached_gateway_ip = gateway_check
+                return _cached_gateway_ip
         except Exception:
             pass
-    return "Unknown"
+    _cached_gateway_ip = "Unknown"
+    return _cached_gateway_ip
 
 def _get_nic_info():
     if_addrs = psutil.net_if_addrs()
@@ -108,15 +137,16 @@ def _get_nic_info():
     return nics
 
 def force_network_check():
-    global _cached_connected_status, _last_conn_check, _cached_public_ip
+    global _cached_connected_status, _last_conn_check, _cached_public_ip, _cached_gateway_ip
     _cached_connected_status = False
     _last_conn_check = 0
     _cached_public_ip = None
+    _cached_gateway_ip = None
 
 def get_network():
     total = psutil.net_io_counters()
     now = time.time()
-    start_time = 60
+    start_time = INTERNET_CHECK
     timer = now - _last_conn_check
     if timer >= start_time or _last_conn_check == 0:
         countdown = start_time
@@ -132,5 +162,7 @@ def get_network():
         "connected": _is_connected(),
         "counter": int(countdown),
         "dns": _dns_address,
-        "resolvers": list(DNS_RESOLVER.keys())
+        "resolvers": list(DNS_RESOLVER.keys()),
+        "ipapi": _ip_website,
+        "checkers": list(IP_CHECKER.keys())
     }

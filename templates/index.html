@@ -4,15 +4,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script type="module" src="{{ url_for('static', filename='js/theme.js') }}"></script>
     <title>System Dashboard Matrix</title>
 </head>
 <body>
     <div class="button-menu">
         <label for="dns-selector">DNS:</label>
-            <select id="dns-selector">
-            </select>
-        <button id="network-check">Internet Check</button>
+            <select id="dns-selector"></select>
+        <label for="ip-checker">IP:</label>
+            <select id="ip-checker"></select>
+        <button id="network-check">Ping</button>
         <button id="theme-toggle" class="button-phosphor">P3 Phosphor</button>
     </div>
     <div id="panel">
