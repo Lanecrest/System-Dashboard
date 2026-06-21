@@ -6,6 +6,7 @@
 - DNS resolver ping frequency
 - DNS resolver choices
 - IP checker choices
+
 -Added export stats button to download all the stats in a raw json file
 
 ## v0.1 (06-19-26)
