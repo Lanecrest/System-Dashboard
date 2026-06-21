@@ -34,3 +34,39 @@ export async function fetchJSON(path) {
     if (!res.ok) throw new Error('HTTP ' + res.status);
     return res.json();
 }
+
+// Export Data
+export function initExportButton() {
+    const exportButton = document.getElementById('export-stats');
+    if (!exportButton) return;
+    exportButton.addEventListener('click', async () => {
+        try {
+            exportButton.disabled = true;
+            exportButton.textContent = 'Exporting...';
+            const response = await fetch('/api/export-json');
+            if (!response.ok) throw new Error('Network response was not ok');
+            const blob = await response.blob();
+            const disposition = response.headers.get('content-disposition');
+            let filename = 'system_stats.json';
+            if (disposition && disposition.includes('filename=')) {
+                filename = disposition.split('filename=')[1].replace(/["']/g, '').trim();
+            }
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = filename;
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(downloadUrl);
+        }
+        catch (e) {
+            console.error('Export failed:', e);
+        }
+        finally {
+            exportButton.disabled = false;
+            exportButton.textContent = 'Export Stats';
+        }
+    });
+}

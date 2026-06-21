@@ -1,4 +1,4 @@
-import { fetchJSON } from "./utils.js";
+import { fetchJSON, initExportButton } from "./utils.js";
 import { initThemeToggle, initCardCollapse } from "./theme.js";
 import { refreshSystemInfo } from "./system.js";
 import { refreshCPUInfo } from "./cpu.js";
@@ -45,6 +45,7 @@ async function initDashboard() {
     initNetworkCheck();
     initDNSSelector();
     initIPSelector();
+    initExportButton();
 
     const refreshInterval = config.TIMERS?.frontend_refresh_seconds * 1000;
     updateDashboard();

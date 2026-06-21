@@ -6,6 +6,7 @@
 - DNS resolver ping frequency
 - DNS resolver choices
 - IP checker choices
+-Added export stats button to download all the stats in a raw json file
 
 ## v0.1 (06-19-26)
 -Initial push to GitHub. Project was in development on and off for around a week before being put online

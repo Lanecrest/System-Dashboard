@@ -86,30 +86,29 @@ def _get_gateway_ip():
     global _cached_gateway_ip
     if _cached_gateway_ip is not None:
         return _cached_gateway_ip
-    os_name = platform.system()
+    use_shell = False
 
-    if os_name == "Windows":
-        try:
-            cmd = ["route", "print", "0.0.0.0"]
-            gateway_check = subprocess.check_output(cmd, stderr=subprocess.DEVNULL).decode()
-            gateway_line = [line for line in gateway_check.splitlines() if "0.0.0.0" in line and "Default" not in line]
-            if gateway_line:
-                _cached_gateway_ip = gateway_line[0].split()[2]
-                return _cached_gateway_ip
-        except Exception:
-            pass
+    if platform.system() == "Windows":
+        cmd = ["route", "print", "0.0.0.0"]
+    elif platform.system() == "Darwin":
+        cmd = "netstat -rn -f inet | grep default | awk '{print $2}' | head -n 1"
+        use_shell = True
     else:
-        try:
-            if platform.system() == "Darwin":
-                cmd = "netstat -rn -f inet | grep default | awk '{print $2}' | head -n 1"
+        cmd = "netstat -rn -4 | grep default | awk '{print $2}' | head -n 1"
+        use_shell = True
+    try:
+        output = subprocess.check_output(cmd, shell=use_shell, stderr=subprocess.DEVNULL).decode().strip()
+        if output:
+            if platform.system() == "Windows":
+                gateway_line = [line for line in output.splitlines() if "0.0.0.0" in line and "Default" not in line]
+                if gateway_line:
+                    _cached_gateway_ip = gateway_line[0].split()[2]
             else:
-                cmd = "netstat -rn -4 | grep default | awk '{print $2}' | head -n 1"
-            gateway_check = subprocess.check_output(cmd, shell=True, stderr=subprocess.DEVNULL).decode().strip()
-            if gateway_check:
-                _cached_gateway_ip = gateway_check
+                _cached_gateway_ip = output
+            if _cached_gateway_ip:
                 return _cached_gateway_ip
-        except Exception:
-            pass
+    except Exception:
+        pass
     _cached_gateway_ip = "Unknown"
     return _cached_gateway_ip
 

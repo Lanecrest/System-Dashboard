@@ -1,4 +1,5 @@
-from flask import Flask, render_template, jsonify, request
+import json, time
+from flask import Flask, render_template, jsonify, request, Response
 import modules.system as system
 import modules.cpu as cpu
 import modules.memory as memory
@@ -37,6 +38,29 @@ def api_set_ip_api():
     checker = data.get("checker", current_api)
     network.set_ip_checker(checker)
     return jsonify(success=True)
+
+@app.route("/api/export-json")
+def api_export():
+    current_time = time.time()
+    try:
+        export_data = {
+            "export_datetime": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(current_time)),
+            "system": system.get_system(),
+            "cpu": cpu.get_cpu(),
+            "memory": memory.get_memory(),
+            "disk": disk.get_disk(),
+            "network": network.get_network()
+        }
+        hostname = export_data["system"].get("host", "unknown")
+        json_string = json.dumps(export_data, indent=4)
+        filename = f"system_{hostname}_{int(time.time())}.json"
+        return Response(
+            json_string,
+            mimetype="application/json",
+            headers={"Content-Disposition": f"attachment;filename={filename}"}
+        )
+    except Exception as e:
+        return jsonify(error=f"Export failed: {str(e)}"), 500
 
 @app.route("/")
 def index():
