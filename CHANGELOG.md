@@ -1,5 +1,12 @@
 # Change Log
 
+## v0.3 (06-21-26)
+-Optimizations to network and system modules
+
+-Added dummy 0.0.0.0 addresses to default config.json to circumvent the script pinging the outside web (if desired)
+
+-Added MIT License
+
 ## v0.2 (06-20-26)
 -Added config.json file for user defined parameters for a few values, namely:
 - dashboard refresh frequency 

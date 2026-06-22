@@ -5,10 +5,12 @@
     },
     "DNS_RESOLVERS": {
         "Cloudflare": "1.1.1.1",
-        "Google": "8.8.8.8"
+        "Google": "8.8.8.8",
+        "0.0.0.0": "0.0.0.0"
     },
     "IP_CHECKERS": {
         "icanhazip": "https://icanhazip.com",
-        "ipify": "https://api.ipify.org"
+        "ipify": "https://api.ipify.org",
+        "0.0.0.0": "0.0.0.0"
     }
 }

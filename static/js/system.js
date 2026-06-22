@@ -1,34 +1,40 @@
 import { formatUptime } from "./utils.js";
 
+let systemDisplay = null;
+
+export function initSystemModule() {
+    systemDisplay = document.getElementById('system');
+}
+
 export function refreshSystemInfo(systemData) {
-        const lines = [];
-        lines.push(
-        `  Device: ${systemData.device}`,
-        `  Serial: ${systemData.serial}`,
-        `  Arch: ${systemData.arch}`,
-        `  OS: ${systemData.os} ${systemData.release}`,
-        `  Kernel: ${systemData.kernel}`,
-        `  Host: ${systemData.host}`,
-        `  Uptime: ${formatUptime(systemData.uptime)}`,
-        );
-        if (systemData.battery) {
-            let status = "Discharging";
-            if (systemData.battery.power_plugged) {
-                if (systemData.battery.charging) {
-                    status = "Plugged In (Charging)";
-                }
-                else {
-                    status = "Plugged In (Idle)";
-                }
-            }
-            else if (systemData.battery.secs_left && systemData.battery.secs_left > 0) {
-                status = `Discharging (${formatUptime(systemData.battery.secs_left)})`;
-            }
-            else {
-                status = "Discharging (Calculating...)";
-            }
-            lines.push(`  Battery: ${systemData.battery.percent}% [${status}]`);
+    if (!systemData) return;
+        const lines = [
+            `  Device: ${systemData.device || 'Unknown'}`,
+            `  Serial: ${systemData.serial || 'Unknown'}`,
+            `  Arch: ${systemData.arch || 'Unknown'}`,
+            `  OS: ${systemData.os || 'Unknown'} ${systemData.release || ''}`,
+            `  Kernel: ${systemData.kernel || 'Unknown'}`,
+            `  Host: ${systemData.host || 'Unknown'}`,
+            `  Uptime: ${formatUptime(systemData.uptime || 0)}`
+        ];
+
+    if (systemData.battery) {
+        const { percent, power_plugged, charging, secs_left } = systemData.battery;
+        let status = "Discharging";
+
+        if (power_plugged) {
+            status = (charging || percent < 99) ? "Plugged In (Charging)" : "Plugged In (Idle)";
         }
-        
-        document.getElementById('system').textContent = lines.join('\n');
+        else if (secs_left && secs_left > 0) {
+            status = `Discharging (${formatUptime(secs_left)})`;
+        }
+        else {
+            status = "Discharging (Calculating...)";
+        }
+        lines.push(`  Battery: ${percent ?? 0}% [${status}]`);
+    }
+
+    if (systemDisplay) {
+        systemDisplay.textContent = lines.join('\n');
+    }
 }

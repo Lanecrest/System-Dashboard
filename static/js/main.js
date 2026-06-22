@@ -1,11 +1,12 @@
 import { fetchJSON, initExportButton } from "./utils.js";
 import { initThemeToggle, initCardCollapse } from "./theme.js";
-import { refreshSystemInfo } from "./system.js";
+import { refreshSystemInfo, initSystemModule } from "./system.js";
 import { refreshCPUInfo } from "./cpu.js";
 import { refreshMemoryInfo } from "./memory.js";
 import { refreshDiskInfo } from "./disk.js";
-import { refreshNetworkInfo, initNetworkCheck, initDNSSelector, initIPSelector } from "./network.js";
+import { refreshNetworkInfo, initNetworkModule } from "./network.js";
 
+// Backup if config.json is corrupted/missing
 let config = {
     TIMERS: {
         frontend_refresh_seconds: 1.5
@@ -42,9 +43,8 @@ async function initDashboard() {
 
     initThemeToggle();
     initCardCollapse();
-    initNetworkCheck();
-    initDNSSelector();
-    initIPSelector();
+    initSystemModule();
+    initNetworkModule();
     initExportButton();
 
     const refreshInterval = config.TIMERS?.frontend_refresh_seconds * 1000;
